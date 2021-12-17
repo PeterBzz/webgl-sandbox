@@ -90,9 +90,32 @@ var delta = 0;
 function drawScene(now)
 {
 	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+	gl.detachShader(shaderProgram, fragmentShader);
+	var fragmentShaderCode = `
+precision highp float;
+
+uniform float width;
+uniform float height;
+uniform float time;
+
+void main(void)
+{
+	gl_FragColor = vec4(abs(sin(time / 1000.0)) * gl_FragCoord.x / width, gl_FragCoord.y / height, gl_FragCoord.z, 1.0);
+}
+`;
+	gl.shaderSource(fragmentShader, fragmentShaderCode);
+	gl.compileShader(fragmentShader);
+	gl.attachShader(shaderProgram, fragmentShader);
+	gl.linkProgram(shaderProgram);
+	gl.useProgram(shaderProgram);
 	delta = now - then;
 	then = now;
 	drawTimeElem.textContent = delta.toFixed(3);
+	widthHandle = gl.getUniformLocation(shaderProgram, "width");
+	heightHandle = gl.getUniformLocation(shaderProgram, "height");
+	timeHandle = gl.getUniformLocation(shaderProgram, "time");
+	gl.uniform1f(widthHandle, canvas.width);
+	gl.uniform1f(heightHandle, canvas.height);
 	gl.uniform1f(timeHandle, now);
 	requestAnimationFrame(drawScene);
 }
