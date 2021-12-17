@@ -85,11 +85,8 @@ gl.uniform1f(widthHandle, canvas.width);
 gl.uniform1f(heightHandle, canvas.height);
 gl.uniform1f(timeHandle, 0.0);
 
-var then = 0;
-var delta = 0;
-function drawScene(now)
+function changeShader(now)
 {
-	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 	gl.detachShader(shaderProgram, fragmentShader);
 	var fragmentShaderCode = `
 precision highp float;
@@ -108,15 +105,23 @@ void main(void)
 	gl.attachShader(shaderProgram, fragmentShader);
 	gl.linkProgram(shaderProgram);
 	gl.useProgram(shaderProgram);
-	delta = now - then;
-	then = now;
-	drawTimeElem.textContent = delta.toFixed(3);
 	widthHandle = gl.getUniformLocation(shaderProgram, "width");
 	heightHandle = gl.getUniformLocation(shaderProgram, "height");
 	timeHandle = gl.getUniformLocation(shaderProgram, "time");
 	gl.uniform1f(widthHandle, canvas.width);
 	gl.uniform1f(heightHandle, canvas.height);
 	gl.uniform1f(timeHandle, now);
+}
+
+var then = 0;
+var delta = 0;
+function drawScene(now)
+{
+	gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+	changeShader(now);
+	delta = now - then;
+	then = now;
+	drawTimeElem.textContent = delta.toFixed(3);
 	requestAnimationFrame(drawScene);
 }
 
